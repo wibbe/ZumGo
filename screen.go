@@ -115,7 +115,7 @@ func drawWorkspace(doc *Document, info []columnInfo) {
 			y := row - doc.Scroll.Y + 1
 
 			color := getHeaderColor(doc.Cursor.X == info[i].column && doc.Cursor.Y == row)
-			drawText(info[i].x, y, info[i].width, color, color, doc.GetCellDisplayString(NewIndex(info[i].column, row)), AlignLeft)
+			drawText(info[i].x, y, info[i].width, color, color, doc.GetCellDisplayText(NewIndex(info[i].column, row)), AlignLeft)
 		}
 	}
 }
@@ -126,10 +126,41 @@ func drawDocument(doc *Document) {
 	drawWorkspace(doc, columnInfo)
 }
 
+func drawFooter(doc *Document) {
+	w, h := termbox.Size()
+
+	filename := "[No Name]"
+	if doc.Filename != "" {
+		filename = doc.Filename
+	}
+
+	cursorPos := " " + columnToStr(doc.Cursor.X) + rowToStr(doc.Cursor.Y) + " "
+
+	color := termbox.ColorDefault | termbox.AttrReverse
+
+	footerPos := h - 1
+	if IsInputMode() {
+		footerPos = h - 2
+		promptLen := utf8.RuneCountInString(GetInputPrompt())
+		drawText(0, footerPos+1, -1, color, color, GetInputPrompt(), AlignLeft)
+		drawText(promptLen, footerPos+1, -1, termbox.ColorDefault, termbox.ColorDefault, GetInputLine(), AlignLeft)
+		termbox.SetCursor(promptLen+GetInputCursor(), footerPos+1)
+	} else {
+		termbox.HideCursor()
+	}
+
+	drawText(0, footerPos, w, color, color, filename, AlignLeft)
+	drawText(w-8, footerPos, 8, color, color, cursorPos, AlignRight)
+}
+
 func redrawInterface() {
 	clearScreen()
 
-	if currentDocument != nil && currentDocument.Width > 0 && currentDocument.Height > 0 {
-		drawDocument(currentDocument)
+	doc := CurrentDoc()
+
+	if doc != nil && doc.Width > 0 && doc.Height > 0 {
+		drawDocument(doc)
 	}
+
+	drawFooter(doc)
 }

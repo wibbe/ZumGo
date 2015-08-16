@@ -20,10 +20,12 @@ func init() {
 		{termbox.KeyArrowRight, 0, 0}: NavigateRight,
 		{termbox.KeyArrowUp, 0, 0}: NavigateUp,
 		{termbox.KeyArrowDown, 0, 0}: NavigateDown,
+		{termbox.KeyEnter, 0, 0}: EditCell,
 		{0, 0, 'h'}: NavigateLeft,
 		{0, 0, 'l'}: NavigateRight,
 		{0, 0, 'j'}: NavigateUp,
 		{0, 0, 'k'}: NavigateDown,
+		{0, 0, ':'}: EnterCommandMode,
 		{termbox.KeyEsc, 0, 0}: exitApplication,
 	}
 	PushNavigationCommands(defaultCommands)
@@ -62,6 +64,16 @@ func NavigateRight() {
 	doc := CurrentDoc()
 	if doc.Cursor.X < (doc.Width - 1) {
 		doc.Cursor.X += 1
+	}
+}
+
+func NavigateRightOrNewLine() {
+	doc := CurrentDoc()
+	if doc.Cursor.X < (doc.Width - 1) {
+		doc.Cursor.X += 1
+	} else if doc.Cursor.Y < (doc.Height - 1) {
+		doc.Cursor.X = 0
+		doc.Cursor.Y += 1
 	}
 }
 

@@ -22,6 +22,7 @@ type Document struct {
 	ColumnWidth []int
 	Cursor      Index
 	Scroll      Index
+	Filename    string
 }
 
 func NewDocument() *Document {
@@ -32,6 +33,7 @@ func NewDocument() *Document {
 		ColumnWidth: make([]int, DefaultWidth),
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
+		Filename:    "",
 	}
 
 	for i := 0; i < doc.Width; i++ {
@@ -41,10 +43,27 @@ func NewDocument() *Document {
 	return doc
 }
 
-func (d *Document) GetCellDisplayString(idx Index) string {
-	value, exists := d.Cells[idx]
-	if exists && value != nil {
-		return value.String()
+func (d *Document) GetCellDisplayText(idx Index) string {
+	cell, exists := d.Cells[idx]
+	if exists && cell != nil {
+		return cell.String()
 	}
 	return ""
+}
+
+func (d *Document) GetCellText(idx Index) string {
+	cell, exists := d.Cells[idx]
+	if exists && cell != nil {
+		return cell.GetText()
+	}
+	return ""
+}
+
+func (d *Document) SetCellText(idx Index, text string) {
+	cell, exists := d.Cells[idx]
+	if exists {
+		cell.SetText(text)
+	} else {
+		d.Cells[idx] = &Cell{value: text}
+	}
 }

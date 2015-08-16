@@ -8,9 +8,7 @@ type EditorMode int
 
 const (
 	NavigateMode EditorMode = iota
-	EditMode
-	CommandMode
-	SearchMode
+	InputMode
 )
 
 var currentDocument *Document
@@ -25,9 +23,8 @@ func HandleKeyEvent(key termbox.Key, mod termbox.Modifier, ch rune) {
 	switch currentMode {
 	case NavigateMode:
 		handleNavigateMode(key, mod, ch)
-	case EditMode:
-	case CommandMode:
-	case SearchMode:
+	case InputMode:
+		handleInputMode(key, mod, ch)
 	}
 }
 
@@ -39,6 +36,15 @@ func IsNavigationMode() bool {
 	return currentMode == NavigateMode
 }
 
-func IsEditMode() bool {
-	return currentMode == EditMode
+func IsInputMode() bool {
+	return currentMode == InputMode
+}
+
+func EditCell() {
+	EnableInputMode(currentDocument.Cursor.String(), currentDocument.GetCellText(currentDocument.Cursor), cellEditFinished)
+}
+
+func cellEditFinished(line string) {
+	currentDocument.SetCellText(currentDocument.Cursor, line)
+	NavigateRightOrNewLine()
 }
