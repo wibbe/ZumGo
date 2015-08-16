@@ -1,2 +1,3 @@
-# ZumGo
-A reimplementatation of zum in the Go programming language
+# Zum
+
+A reimplementatation of zum-cpp in Go.

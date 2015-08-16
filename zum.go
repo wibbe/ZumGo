@@ -11,10 +11,12 @@ func main() {
 	defer termbox.Close()
 
 	termbox.SetInputMode(termbox.InputEsc)
-	termbox.SetCursor(0, 0)
+	termbox.HideCursor()
 
 	clearScreen()
 	termbox.Flush()
+
+	initEditor()
 
 	running := true
 
@@ -28,7 +30,7 @@ func main() {
 			}
 		}
 
-		redrawScreen()
+		redrawInterface()
 		termbox.Flush()
 	}
 
