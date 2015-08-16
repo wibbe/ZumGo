@@ -16,6 +16,10 @@ func NewIndex(x, y int) Index {
 	return Index{X: x, Y: y}
 }
 
+func (i Index) String() string {
+	return columnToStr(i.X) + rowToStr(i.Y)
+}
+
 func rowToStr(row int) string {
 	return fmt.Sprintf("%d", row+1)
 }

@@ -74,10 +74,10 @@ func drawText(x, y, length int, fg, bg termbox.Attribute, str string, format For
 	}
 }
 
-func getHeaderColor(cursor, header int) termbox.Attribute {
+func getHeaderColor(equal bool) termbox.Attribute {
 	color := termbox.ColorDefault
 
-	if cursor == header {
+	if equal {
 		color = termbox.AttrReverse | termbox.ColorDefault
 	}
 
@@ -87,7 +87,7 @@ func getHeaderColor(cursor, header int) termbox.Attribute {
 func drawHeaders(doc *Document, info []columnInfo) {
 	// Draw column headers
 	for x := 0; x < len(info); x++ {
-		color := getHeaderColor(doc.Cursor.X, info[x].column)
+		color := getHeaderColor(doc.Cursor.X == info[x].column)
 		drawText(info[x].x, 0, info[x].width, color, color, columnToStr(info[x].column), AlignCenter)
 	}
 
@@ -101,7 +101,7 @@ func drawHeaders(doc *Document, info []columnInfo) {
 
 	for y := 1; y <= yEnd; y++ {
 		row := y + doc.Scroll.Y - 1
-		color := getHeaderColor(doc.Cursor.Y, row)
+		color := getHeaderColor(doc.Cursor.Y == row)
 
 		if row < doc.Height {
 			drawText(0, y, RowHeaderWidth, color, color, rowToStr(row)+" ", AlignRight)
@@ -109,9 +109,21 @@ func drawHeaders(doc *Document, info []columnInfo) {
 	}
 }
 
+func drawWorkspace(doc *Document, info []columnInfo) {
+	for row := doc.Scroll.Y; row < doc.Height; row++ {
+		for i := 0; i < len(info); i++ {
+			y := row - doc.Scroll.Y + 1
+
+			color := getHeaderColor(doc.Cursor.X == info[i].column && doc.Cursor.Y == row)
+			drawText(info[i].x, y, info[i].width, color, color, doc.GetCellDisplayString(NewIndex(info[i].column, row)), AlignLeft)
+		}
+	}
+}
+
 func drawDocument(doc *Document) {
 	columnInfo := calculateColumnInfo(doc)
 	drawHeaders(doc, columnInfo)
+	drawWorkspace(doc, columnInfo)
 }
 
 func redrawInterface() {

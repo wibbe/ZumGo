@@ -2,7 +2,7 @@ package main
 
 const (
 	DefaultWidth       = 5
-	DefaultHeight      = 5
+	DefaultHeight      = 10
 	DefaultColumnWidth = 20
 )
 
@@ -41,7 +41,7 @@ func NewDocument() *Document {
 	return doc
 }
 
-func (d *Document) GetCellString(idx Index) string {
+func (d *Document) GetCellDisplayString(idx Index) string {
 	value, exists := d.Cells[idx]
 	if exists && value != nil {
 		return value.String()

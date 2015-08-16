@@ -2,6 +2,12 @@ package main
 
 import "github.com/nsf/termbox-go"
 
+var running bool
+
+func exitApplication() {
+	running = false
+}
+
 func main() {
 	err := termbox.Init()
 	if err != nil {
@@ -16,18 +22,16 @@ func main() {
 	clearScreen()
 	termbox.Flush()
 
-	initEditor()
+	InitEditor()
 
-	running := true
+	running = true
 
 	for running {
 		event := termbox.PollEvent()
 
 		switch event.Type {
 		case termbox.EventKey:
-			if event.Key == termbox.KeyEsc {
-				running = false
-			}
+			HandleKeyEvent(event.Key, event.Mod, event.Ch)
 		}
 
 		redrawInterface()
