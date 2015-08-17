@@ -1,5 +1,11 @@
 package main
 
+import (
+	"encoding/csv"
+	"log"
+	"os"
+)
+
 const (
 	DefaultWidth       = 5
 	DefaultHeight      = 10
@@ -70,4 +76,42 @@ func (d *Document) SetCellText(idx Index, text string) {
 	}
 
 	d.Changed = true
+}
+
+func (d *Document) Save() error {
+	if d.Filename == "" {
+		return &ApplicationError{message: "Could not save document, no filename specified"}
+	}
+
+	file, err := os.Create(d.Filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	csvWriter := csv.NewWriter(file)
+
+	row := make([]string, d.Width)
+	for y := 0; y < d.Height; y++ {
+		for x := 0; x < d.Width; x++ {
+			row[x] = d.GetCellText(NewIndex(x, y))
+		}
+
+		err = csvWriter.Write(row)
+		if err != nil {
+			return err
+		}
+	}
+
+	csvWriter.Flush()
+	err = csvWriter.Error()
+	if err != nil {
+		return err
+	}
+
+	log.Println("Saved document", d.Filename)
+
+	d.Changed = false
+
+	return nil
 }

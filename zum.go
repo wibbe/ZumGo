@@ -2,25 +2,18 @@ package main
 
 import (
 	"github.com/nsf/termbox-go"
-	"strings"
+	"log"
+	"os"
 )
 
-var running bool
+var applicationRunning bool
 
-func exitApplication() {
-	quit, exists := GetArg(1)
-	quit = strings.ToLower(quit)
+type ApplicationError struct {
+	message string
+}
 
-	if exists && (quit == "y" || quit == "yes") {
-		running = false
-	} else {
-		EnableInputMode("Quit (Y/n): ", "", func(line string) {
-			result := strings.ToLower(line)
-			if result == "" || result == "y" || result == "yes" {
-				running = false
-			}
-		})
-	}
+func (a *ApplicationError) Error() string {
+	return a.message
 }
 
 func main() {
@@ -37,11 +30,22 @@ func main() {
 	clearScreen()
 	termbox.Flush()
 
+	// Setup log
+	logFile, err := os.Create("zum.log")
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+
+	log.SetOutput(logFile)
+
 	InitEditor()
 
-	running = true
+	log.Println("Application initialized")
 
-	for running {
+	applicationRunning = true
+
+	for applicationRunning {
 		event := termbox.PollEvent()
 
 		switch event.Type {

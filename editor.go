@@ -24,7 +24,8 @@ func InitEditor() {
 		{"navigate-up", NavigateUp},
 		{"navigate-down", NavigateDown},
 		{"enter-command-mode", EnterCommandMode},
-		{"edit-current-cell", EditCell},
+		{"edit-current-cell", editCell},
+		{"save-document", saveDocument},
 		{"quit", exitApplication},
 	})
 }
@@ -50,7 +51,7 @@ func IsInputMode() bool {
 	return currentMode == InputMode
 }
 
-func EditCell() {
+func editCell() {
 	EnableInputMode("", currentDocument.GetCellText(currentDocument.Cursor), cellEditFinished)
 }
 

@@ -26,6 +26,7 @@ func init() {
 		{0, 0, 'j'}:                   "navigate-up",
 		{0, 0, 'k'}:                   "navigate-down",
 		{0, 0, ':'}:                   "enter-command-mode",
+		{termbox.KeyCtrlS, 0, 0}:      "save-document",
 		{termbox.KeyEsc, 0, 0}:        "quit",
 	}
 	PushNavigationCommands(defaultCommands)
@@ -37,44 +38,6 @@ func PushNavigationCommands(commands map[KeyCombo]string) {
 
 func PopNavigationCommands() {
 
-}
-
-func NavigateUp() {
-	doc := CurrentDoc()
-	if doc.Cursor.Y > 0 {
-		doc.Cursor.Y -= 1
-	}
-}
-
-func NavigateDown() {
-	doc := CurrentDoc()
-	if doc.Cursor.Y < (doc.Height - 1) {
-		doc.Cursor.Y += 1
-	}
-}
-
-func NavigateLeft() {
-	doc := CurrentDoc()
-	if doc.Cursor.X > 0 {
-		doc.Cursor.X -= 1
-	}
-}
-
-func NavigateRight() {
-	doc := CurrentDoc()
-	if doc.Cursor.X < (doc.Width - 1) {
-		doc.Cursor.X += 1
-	}
-}
-
-func NavigateRightOrNewLine() {
-	doc := CurrentDoc()
-	if doc.Cursor.X < (doc.Width - 1) {
-		doc.Cursor.X += 1
-	} else if doc.Cursor.Y < (doc.Height - 1) {
-		doc.Cursor.X = 0
-		doc.Cursor.Y += 1
-	}
 }
 
 func handleNavigateMode(key termbox.Key, mod termbox.Modifier, ch rune) {
