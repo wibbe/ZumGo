@@ -97,7 +97,10 @@ func (d *Document) Save() error {
 		row[i] = strconv.Itoa(d.ColumnWidth[i])
 	}
 
-	csvWriter.Write(row)
+	err = csvWriter.Write(row)
+	if err != nil {
+		return err
+	}
 
 	for y := 0; y < d.Height; y++ {
 		for x := 0; x < d.Width; x++ {
