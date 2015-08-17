@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
+	"strconv"
 )
 
 const (
@@ -92,6 +93,12 @@ func (d *Document) Save() error {
 	csvWriter := csv.NewWriter(file)
 
 	row := make([]string, d.Width)
+	for i := 0; i < d.Width; i++ {
+		row[i] = strconv.Itoa(d.ColumnWidth[i])
+	}
+
+	csvWriter.Write(row)
+
 	for y := 0; y < d.Height; y++ {
 		for x := 0; x < d.Width; x++ {
 			row[x] = d.GetCellText(NewIndex(x, y))
