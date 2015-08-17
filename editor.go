@@ -26,6 +26,8 @@ func InitEditor() {
 		{"enter-command-mode", EnterCommandMode},
 		{"edit-current-cell", editCell},
 		{"save-document", saveDocument},
+		{"open-document", openDocument},
+		{"modify-column-width", modifyColumnWidth},
 		{"quit", exitApplication},
 	})
 }

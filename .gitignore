@@ -23,4 +23,5 @@ _testmain.go
 *.test
 *.prof
 
-zum.log
+/.zum.log
+/test.csv

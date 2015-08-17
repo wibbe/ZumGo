@@ -17,18 +17,23 @@ func init() {
 
 	defaultCommands := map[KeyCombo]string{
 		{termbox.KeyArrowLeft, 0, 0}:  "navigate-left",
-		{termbox.KeyArrowRight, 0, 0}: "navigate-right",
-		{termbox.KeyArrowUp, 0, 0}:    "navigate-up",
-		{termbox.KeyArrowDown, 0, 0}:  "navigate-down",
-		{termbox.KeyEnter, 0, 0}:      "edit-current-cell",
 		{0, 0, 'h'}:                   "navigate-left",
+		{termbox.KeyArrowRight, 0, 0}: "navigate-right",
 		{0, 0, 'l'}:                   "navigate-right",
+		{termbox.KeyArrowUp, 0, 0}:    "navigate-up",
 		{0, 0, 'j'}:                   "navigate-up",
+		{termbox.KeyArrowDown, 0, 0}:  "navigate-down",
 		{0, 0, 'k'}:                   "navigate-down",
+		{termbox.KeyEnter, 0, 0}:      "edit-current-cell",
+		{0, 0, 'i'}:                   "edit-current-cell",
 		{0, 0, ':'}:                   "enter-command-mode",
+		{0, 0, '+'}:                   "modify-column-width 1",
+		{0, 0, '-'}:                   "modify-column-width -1",
 		{termbox.KeyCtrlS, 0, 0}:      "save-document",
+		{termbox.KeyCtrlO, 0, 0}:      "open-document",
 		{termbox.KeyEsc, 0, 0}:        "quit",
 	}
+
 	PushNavigationCommands(defaultCommands)
 }
 

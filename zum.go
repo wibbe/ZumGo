@@ -8,14 +8,6 @@ import (
 
 var applicationRunning bool
 
-type ApplicationError struct {
-	message string
-}
-
-func (a *ApplicationError) Error() string {
-	return a.message
-}
-
 func main() {
 	err := termbox.Init()
 	if err != nil {
@@ -31,7 +23,7 @@ func main() {
 	termbox.Flush()
 
 	// Setup log
-	logFile, err := os.Create("zum.log")
+	logFile, err := os.Create(".zum.log")
 	if err != nil {
 		panic(err)
 	}

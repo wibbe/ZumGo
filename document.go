@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 )
 
@@ -11,6 +14,7 @@ const (
 	DefaultWidth       = 5
 	DefaultHeight      = 10
 	DefaultColumnWidth = 20
+	MinColumnWidth     = 3
 )
 
 type Format uint16
@@ -52,6 +56,82 @@ func NewDocument() *Document {
 	return doc
 }
 
+func LoadDocument(filename string) (*Document, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	csvReader := csv.NewReader(file)
+
+	var rows [][]string
+
+	rows, err = csvReader.ReadAll()
+
+	height := len(rows)
+	if height == 0 {
+		return nil, errors.New("No data in the document")
+	}
+
+	doc := &Document{
+		Width:       0,
+		Height:      0,
+		Cells:       make(map[Index]*Cell),
+		ColumnWidth: nil,
+		Scroll:      NewIndex(0, 0),
+		Cursor:      NewIndex(0, 0),
+		Filename:    filename,
+		Changed:     false,
+	}
+
+	headerInfo := true
+	headerRe := regexp.MustCompile("#{([0-9]+)}")
+
+	// Parse header information
+	for i := 0; i < len(rows[0]); i++ {
+		matches := headerRe.FindStringSubmatch(rows[0][i])
+
+		if len(matches) != 2 {
+			headerInfo = false
+		}
+
+		if headerInfo {
+			width, err := strconv.Atoi(matches[1])
+			if err != nil {
+				headerInfo = false
+			} else {
+				doc.ColumnWidth = append(doc.ColumnWidth, width)
+			}
+		}
+
+		if !headerInfo {
+			doc.ColumnWidth = append(doc.ColumnWidth, DefaultColumnWidth)
+		}
+	}
+
+	startRow := 0
+	if headerInfo {
+		startRow = 1
+	}
+
+	doc.Height = height - startRow
+	doc.Width = len(rows[0])
+
+	for y := startRow; y < height; y++ {
+		for x := 0; x < doc.Width; x++ {
+			if rows[y][x] != "" {
+				doc.SetCellText(NewIndex(x, y-startRow), rows[y][x])
+			}
+		}
+	}
+
+	doc.Changed = false
+	log.Printf("Document '%s' loaded", filename)
+
+	return doc, nil
+}
+
 func (d *Document) GetCellDisplayText(idx Index) string {
 	cell, exists := d.Cells[idx]
 	if exists && cell != nil {
@@ -73,15 +153,28 @@ func (d *Document) SetCellText(idx Index, text string) {
 	if exists {
 		cell.SetText(text)
 	} else {
-		d.Cells[idx] = &Cell{value: text}
+		d.Cells[idx] = NewCell(text)
 	}
 
 	d.Changed = true
 }
 
+func (d *Document) ModifyColumnWidth(column, modification int) {
+	if column < 0 || column >= d.Width {
+		return
+	}
+
+	d.Changed = true
+	d.ColumnWidth[column] += modification
+
+	if d.ColumnWidth[column] < MinColumnWidth {
+		d.ColumnWidth[column] = MinColumnWidth
+	}
+}
+
 func (d *Document) Save() error {
 	if d.Filename == "" {
-		return &ApplicationError{message: "Could not save document, no filename specified"}
+		return errors.New("Could not save document, no filename specified")
 	}
 
 	file, err := os.Create(d.Filename)
@@ -93,8 +186,10 @@ func (d *Document) Save() error {
 	csvWriter := csv.NewWriter(file)
 
 	row := make([]string, d.Width)
+
+	// Write column info
 	for i := 0; i < d.Width; i++ {
-		row[i] = strconv.Itoa(d.ColumnWidth[i])
+		row[i] = fmt.Sprintf("#{%d}", d.ColumnWidth[i])
 	}
 
 	err = csvWriter.Write(row)
@@ -119,7 +214,7 @@ func (d *Document) Save() error {
 		return err
 	}
 
-	log.Println("Saved document", d.Filename)
+	log.Printf("Document '%s' saved", d.Filename)
 
 	d.Changed = false
 

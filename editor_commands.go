@@ -84,3 +84,35 @@ func saveDocument() {
 		}
 	}
 }
+
+func openDocumentCallback(filename string) {
+	if filename == "" {
+		return
+	}
+
+	doc, err := LoadDocument(filename)
+	if err != nil {
+		log.Println("Could not open document: ", err)
+	} else {
+		currentDocument = doc
+	}
+}
+
+func openDocument() {
+	filename, exists := GetArg(1)
+
+	if exists {
+		openDocumentCallback(filename)
+	} else {
+		EnableInputMode("Open file: ", "", openDocumentCallback)
+	}
+}
+
+func modifyColumnWidth() {
+	change, exists := GetIntArg(1)
+	if !exists {
+		return
+	}
+
+	CurrentDoc().ModifyColumnWidth(CurrentDoc().Cursor.X, change)
+}

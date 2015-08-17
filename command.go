@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"strconv"
 	"strings"
 )
 
@@ -62,6 +64,21 @@ func GetArg(idx int) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func GetIntArg(idx int) (int, bool) {
+	strValue, exists := GetArg(idx)
+	if !exists {
+		return 0, false
+	}
+
+	intValue, err := strconv.Atoi(strValue)
+	if err != nil {
+		log.Printf("Error in command %s - Expected integer for argument %d but got '%s'", GetArgs()[0], idx, strValue)
+		return 0, false
+	}
+
+	return intValue, true
 }
 
 func GetArgs() []string {
