@@ -29,7 +29,7 @@ const (
 type Document struct {
 	Width       int
 	Height      int
-	Cells       map[Index]*Cell
+	Cells       map[Index]Cell
 	ColumnWidth []int
 	Cursor      Index
 	Scroll      Index
@@ -41,7 +41,7 @@ func NewDocument() *Document {
 	doc := &Document{
 		Width:       DefaultWidth,
 		Height:      DefaultHeight,
-		Cells:       make(map[Index]*Cell),
+		Cells:       make(map[Index]Cell),
 		ColumnWidth: make([]int, DefaultWidth),
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
@@ -77,7 +77,7 @@ func LoadDocument(filename string) (*Document, error) {
 	doc := &Document{
 		Width:       0,
 		Height:      0,
-		Cells:       make(map[Index]*Cell),
+		Cells:       make(map[Index]Cell),
 		ColumnWidth: nil,
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
@@ -121,12 +121,12 @@ func LoadDocument(filename string) (*Document, error) {
 	for y := startRow; y < height; y++ {
 		for x := 0; x < doc.Width; x++ {
 			if rows[y][x] != "" {
-				doc.SetCellText(NewIndex(x, y-startRow), rows[y][x])
+				doc.Cells[NewIndex(x, y-startRow)] = NewCell(rows[y][x])
 			}
 		}
 	}
 
-	doc.Changed = false
+	doc.Evaluate()
 	log.Printf("Document '%s' loaded", filename)
 
 	return doc, nil
@@ -149,14 +149,19 @@ func (d *Document) GetCellText(idx Index) string {
 }
 
 func (d *Document) SetCellText(idx Index, text string) {
-	cell, exists := d.Cells[idx]
-	if exists {
-		cell.SetText(text)
-	} else {
-		d.Cells[idx] = NewCell(text)
+	d.Cells[idx] = NewCell(text)
+	d.Changed = true
+	d.Evaluate()
+}
+
+func (d *Document) Evaluate() {
+	for _, cell := range d.Cells {
+		cell.Modified()
 	}
 
-	d.Changed = true
+	for _, cell := range d.Cells {
+		cell.Eval(d)
+	}
 }
 
 func (d *Document) ModifyColumnWidth(column, modification int) {
