@@ -23,6 +23,7 @@ type Document struct {
 	Cursor      Index
 	Scroll      Index
 	Filename    string
+	Changed     bool
 }
 
 func NewDocument() *Document {
@@ -34,6 +35,7 @@ func NewDocument() *Document {
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
 		Filename:    "",
+		Changed:     false,
 	}
 
 	for i := 0; i < doc.Width; i++ {
@@ -66,4 +68,6 @@ func (d *Document) SetCellText(idx Index, text string) {
 	} else {
 		d.Cells[idx] = &Cell{value: text}
 	}
+
+	d.Changed = true
 }

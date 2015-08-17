@@ -52,8 +52,10 @@ func handleInputMode(key termbox.Key, mod termbox.Modifier, ch rune) {
 			}
 
 		case termbox.KeyEnter:
-			inputFunction(string(inputLine))
+			line := string(inputLine)
+			cmd := inputFunction
 			DisableInputMode()
+			cmd(line)
 
 		case termbox.KeyEsc:
 			DisableInputMode()

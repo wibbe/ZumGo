@@ -1,11 +1,26 @@
 package main
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+	"strings"
+)
 
 var running bool
 
 func exitApplication() {
-	running = false
+	quit, exists := GetArg(1)
+	quit = strings.ToLower(quit)
+
+	if exists && (quit == "y" || quit == "yes") {
+		running = false
+	} else {
+		EnableInputMode("Quit (Y/n): ", "", func(line string) {
+			result := strings.ToLower(line)
+			if result == "" || result == "y" || result == "yes" {
+				running = false
+			}
+		})
+	}
 }
 
 func main() {

@@ -134,23 +134,32 @@ func drawFooter(doc *Document) {
 		filename = doc.Filename
 	}
 
+	if doc.Changed {
+		filename = filename + "*"
+	}
+
 	cursorPos := " " + columnToStr(doc.Cursor.X) + rowToStr(doc.Cursor.Y) + " "
 
 	color := termbox.ColorDefault | termbox.AttrReverse
 
-	footerPos := h - 1
+	footerPos := h - 2
+
+	inputPrompt := GetInputPrompt()
+	inputLine := GetInputLine()
+	promptLen := utf8.RuneCountInString(inputPrompt)
+
 	if IsInputMode() {
-		footerPos = h - 2
-		promptLen := utf8.RuneCountInString(GetInputPrompt())
-		drawText(0, footerPos+1, -1, color, color, GetInputPrompt(), AlignLeft)
-		drawText(promptLen, footerPos+1, -1, termbox.ColorDefault, termbox.ColorDefault, GetInputLine(), AlignLeft)
 		termbox.SetCursor(promptLen+GetInputCursor(), footerPos+1)
 	} else {
 		termbox.HideCursor()
+		inputPrompt = ""
+		inputLine = doc.GetCellDisplayText(doc.Cursor)
 	}
 
 	drawText(0, footerPos, w, color, color, filename, AlignLeft)
 	drawText(w-8, footerPos, 8, color, color, cursorPos, AlignRight)
+
+	drawText(0, footerPos+1, w, termbox.ColorDefault, termbox.ColorDefault, inputPrompt+inputLine, AlignLeft)
 }
 
 func redrawInterface() {

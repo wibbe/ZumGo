@@ -10,28 +10,28 @@ type KeyCombo struct {
 	Ch  rune
 }
 
-var navigationCommands []map[KeyCombo]func()
+var navigationCommands []map[KeyCombo]string
 
 func init() {
-	navigationCommands = make([]map[KeyCombo]func(), 0, 2)
+	navigationCommands = make([]map[KeyCombo]string, 0, 2)
 
-	defaultCommands := map[KeyCombo]func(){
-		{termbox.KeyArrowLeft, 0, 0}: NavigateLeft,
-		{termbox.KeyArrowRight, 0, 0}: NavigateRight,
-		{termbox.KeyArrowUp, 0, 0}: NavigateUp,
-		{termbox.KeyArrowDown, 0, 0}: NavigateDown,
-		{termbox.KeyEnter, 0, 0}: EditCell,
-		{0, 0, 'h'}: NavigateLeft,
-		{0, 0, 'l'}: NavigateRight,
-		{0, 0, 'j'}: NavigateUp,
-		{0, 0, 'k'}: NavigateDown,
-		{0, 0, ':'}: EnterCommandMode,
-		{termbox.KeyEsc, 0, 0}: exitApplication,
+	defaultCommands := map[KeyCombo]string{
+		{termbox.KeyArrowLeft, 0, 0}:  "navigate-left",
+		{termbox.KeyArrowRight, 0, 0}: "navigate-right",
+		{termbox.KeyArrowUp, 0, 0}:    "navigate-up",
+		{termbox.KeyArrowDown, 0, 0}:  "navigate-down",
+		{termbox.KeyEnter, 0, 0}:      "edit-current-cell",
+		{0, 0, 'h'}:                   "navigate-left",
+		{0, 0, 'l'}:                   "navigate-right",
+		{0, 0, 'j'}:                   "navigate-up",
+		{0, 0, 'k'}:                   "navigate-down",
+		{0, 0, ':'}:                   "enter-command-mode",
+		{termbox.KeyEsc, 0, 0}:        "quit",
 	}
 	PushNavigationCommands(defaultCommands)
 }
 
-func PushNavigationCommands(commands map[KeyCombo]func()) {
+func PushNavigationCommands(commands map[KeyCombo]string) {
 	navigationCommands = append(navigationCommands, commands)
 }
 
@@ -80,10 +80,10 @@ func NavigateRightOrNewLine() {
 func handleNavigateMode(key termbox.Key, mod termbox.Modifier, ch rune) {
 	keys := KeyCombo{key, mod, ch}
 
-	for i := len(navigationCommands)-1; i >= 0; i-- {
+	for i := len(navigationCommands) - 1; i >= 0; i-- {
 		cmd, exists := navigationCommands[i][keys]
 		if exists {
-			cmd()
+			ExecLine(cmd)
 			break
 		}
 	}

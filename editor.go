@@ -17,6 +17,16 @@ var currentMode EditorMode
 func InitEditor() {
 	currentMode = NavigateMode
 	currentDocument = NewDocument()
+
+	RegisterCommands("default", []Command{
+		{"navigate-left", NavigateLeft},
+		{"navigate-right", NavigateRight},
+		{"navigate-up", NavigateUp},
+		{"navigate-down", NavigateDown},
+		{"enter-command-mode", EnterCommandMode},
+		{"edit-current-cell", EditCell},
+		{"quit", exitApplication},
+	})
 }
 
 func HandleKeyEvent(key termbox.Key, mod termbox.Modifier, ch rune) {
@@ -41,7 +51,7 @@ func IsInputMode() bool {
 }
 
 func EditCell() {
-	EnableInputMode(currentDocument.Cursor.String(), currentDocument.GetCellText(currentDocument.Cursor), cellEditFinished)
+	EnableInputMode("", currentDocument.GetCellText(currentDocument.Cursor), cellEditFinished)
 }
 
 func cellEditFinished(line string) {
