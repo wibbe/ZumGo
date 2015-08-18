@@ -154,6 +154,14 @@ func (d *Document) SetCellText(idx Index, text string) {
 	d.Evaluate()
 }
 
+func (d *Document) GetCell(idx Index) (Cell, error) {
+	cell, exists := d.Cells[idx]
+	if exists {
+		return cell, nil
+	}
+	return nil, errors.New("No data at specified index")
+}
+
 func (d *Document) Evaluate() {
 	for _, cell := range d.Cells {
 		cell.Modified()

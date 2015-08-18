@@ -14,10 +14,18 @@ type Cell interface {
 
 func NewCell(text string) Cell {
 	if len(text) > 1 && text[0] == '=' {
+		expr, err := ParseExpression(text)
+		if err != nil {
+			return &TextCell{
+				value: text,
+			}
+		}
+
 		return &ExprCell{
 			result:   0.0,
 			modified: true,
 			hasError: false,
+			expr:     expr,
 		}
 	} else {
 		number, err := strconv.ParseFloat(text, 64)
@@ -77,6 +85,7 @@ type ExprCell struct {
 	result   float64
 	modified bool
 	hasError bool
+	expr     *Expr
 }
 
 func (c *ExprCell) String() string {
