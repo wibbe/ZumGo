@@ -1,46 +1,103 @@
 package main
 
+import (
+	"errors"
+	//	"go/scanner"
+	"go/token"
+	//	"strconv"
+)
+
 type OperandType int
 
 const (
-	OpConstant OperandType = iota
-	OpCellRef
-	OpRangeRef
-	OpFunction
+	ConstantSymbol OperandType = iota
+	CellSymbol
+	RangeSymbol
+	FunctionSymbol
 )
 
-type Operand interface {
+type Symbol interface {
 	Value(doc *Document) float64
 	Type() OperandType
 }
 
+type SymbolFunc func(*Document, []Symbol) []Symbol
+
 type Expr struct {
-	expression []Operand
+	expression []Symbol
+}
+
+type operatorPair struct {
+	tok token.Token
+	lit string
 }
 
 func ParseExpression(text string) (*Expr, error) {
+	/*
+		output := make([]Symbol)
+		operatorStack := make([]operatorPair, 0, 10)
+
+		var s scanner.Scanner
+
+		fileSet := token.NewFileSet()
+		file := fileSet.AddFile("", fileSet.Base(), len(text))
+		s.Init(file, []byte(text), nil, scanner.ScanComments)
+
+		for {
+			_, tok, lit := s.Scan()
+
+			switch tok {
+			case token.INT:
+				number, err := strconv.ParseFloat(lit, 64)
+				if err != nil {
+					return nil, err
+				}
+				output = append(output, NewConstant(number))
+
+			case token.FLOAT:
+				number, err := strconv.ParseFloat(lit, 64)
+				if err != nil {
+					return nil, err
+				}
+				output = append(output, NewConstant(number))
+
+			case token.IDENT:
+			}
+
+			if tok == token.EOF {
+				break
+			}
+		}
+
+		return output, nil
+	*/
 	return nil, nil
 }
 
 func (e *Expr) String() string {
-	return "="
+	return ""
 }
 
 func (e *Expr) Evaluate(doc *Document) (float64, error) {
-	argStack := make([]Operand, 0, len(e.expression)/2)
+	argStack := make([]Symbol, 0, len(e.expression)/2)
 
-	for _, op := range e.expression {
-		switch op.Type() {
-		case OpConstant:
-		case OpCellRef:
-		case OpRangeRef:
-			argStack = append(argStack, op)
-		case OpFunction:
-			//f := op.(*Function)
+	for _, symbol := range e.expression {
+		switch symbol.Type() {
+		case ConstantSymbol:
+		case CellSymbol:
+		case RangeSymbol:
+			argStack = append(argStack, symbol)
+		case FunctionSymbol:
+			f := symbol.(*Function)
+			argStack = f.cmd(doc, argStack)
 		}
 	}
 
-	return 0.0, nil
+	if len(argStack) != 0 {
+		return 0.0, errors.New("error while evaluating expression '" + e.String() + "'")
+	}
+
+	return argStack[0].Value(doc), nil
 }
 
 type Constant struct {
@@ -48,6 +105,7 @@ type Constant struct {
 }
 
 func NewConstant(value float64) *Constant {
+
 	return &Constant{value: value}
 }
 
@@ -56,7 +114,7 @@ func (c *Constant) Value(doc *Document) float64 {
 }
 
 func (c *Constant) Type() OperandType {
-	return OpConstant
+	return ConstantSymbol
 }
 
 type CellRef struct {
@@ -82,7 +140,7 @@ func (c *CellRef) Value(doc *Document) float64 {
 }
 
 func (c *CellRef) Type() OperandType {
-	return OpConstant
+	return ConstantSymbol
 }
 
 type RangeRef struct {
@@ -99,10 +157,11 @@ func (r *RangeRef) Value(doc *Document) float64 {
 }
 
 func (r *RangeRef) Type() OperandType {
-	return OpRangeRef
+	return RangeSymbol
 }
 
 type Function struct {
+	cmd SymbolFunc
 }
 
 func (f *Function) Value(doc *Document) float64 {
@@ -110,5 +169,5 @@ func (f *Function) Value(doc *Document) float64 {
 }
 
 func (f *Function) Type() OperandType {
-	return OpFunction
+	return FunctionSymbol
 }
