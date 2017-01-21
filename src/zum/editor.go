@@ -59,5 +59,5 @@ func editCell() {
 
 func cellEditFinished(line string) {
 	currentDocument.SetCellText(currentDocument.Cursor, line)
-	NavigateRightOrNewLine()
+	NavigateRight()
 }

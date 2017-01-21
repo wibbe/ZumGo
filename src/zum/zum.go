@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/nsf/termbox-go"
 	"log"
 	"os"
+
+	"github.com/nsf/termbox-go"
 )
 
 var applicationRunning bool
@@ -19,9 +20,6 @@ func main() {
 	termbox.SetInputMode(termbox.InputEsc)
 	termbox.HideCursor()
 
-	clearScreen()
-	termbox.Flush()
-
 	// Setup log
 	logFile, err := os.Create(".zum.log")
 	if err != nil {
@@ -30,10 +28,12 @@ func main() {
 	defer logFile.Close()
 
 	log.SetOutput(logFile)
-
-	InitEditor()
+	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	log.Println("Application initialized")
+
+	InitEditor()
+	RedrawInterface()
 
 	applicationRunning = true
 
@@ -45,8 +45,7 @@ func main() {
 			HandleKeyEvent(event.Key, event.Mod, event.Ch)
 		}
 
-		redrawInterface()
-		termbox.Flush()
+		RedrawInterface()
 	}
 
 }

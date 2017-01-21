@@ -1,12 +1,17 @@
 package main
 
 import (
-	"github.com/nsf/termbox-go"
 	"unicode/utf8"
+
+	"github.com/nsf/termbox-go"
 )
 
 const (
 	RowHeaderWidth = 8
+)
+
+var (
+	ViewportSize Index
 )
 
 type columnInfo struct {
@@ -19,23 +24,23 @@ func clearScreen() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 }
 
-func calculateColumnInfo(doc *Document) []columnInfo {
+func calculateColumnInfo(doc *Document) ([]columnInfo, int) {
 	info := make([]columnInfo, 0)
 
 	w, _ := termbox.Size()
 
 	x := RowHeaderWidth
-	for i := doc.Scroll.X; i < doc.Width; i++ {
-		width := doc.ColumnWidth[i]
-		info = append(info, columnInfo{column: i, x: x, width: width})
+	col := doc.Scroll.X
 
+	for x < w {
+		width := doc.GetColumnWidth(col)
+
+		info = append(info, columnInfo{column: col, x: x, width: width})
 		x += width
-		if x > w {
-			break
-		}
+		col++
 	}
 
-	return info
+	return info, col
 }
 
 func drawText(x, y, length int, fg, bg termbox.Attribute, str string, format Format) {
@@ -120,8 +125,7 @@ func drawWorkspace(doc *Document, info []columnInfo) {
 	}
 }
 
-func drawDocument(doc *Document) {
-	columnInfo := calculateColumnInfo(doc)
+func drawDocument(doc *Document, columnInfo []columnInfo) {
 	drawHeaders(doc, columnInfo)
 	drawWorkspace(doc, columnInfo)
 }
@@ -162,14 +166,14 @@ func drawFooter(doc *Document) {
 	drawText(0, footerPos+1, w, termbox.ColorDefault, termbox.ColorDefault, inputPrompt+inputLine, AlignLeft)
 }
 
-func redrawInterface() {
+func RedrawInterface() {
 	clearScreen()
 
 	doc := CurrentDoc()
+	columnInfo, width := calculateColumnInfo(doc)
+	ViewportSize.X = width - 1
 
-	if doc != nil && doc.Width > 0 && doc.Height > 0 {
-		drawDocument(doc)
-	}
-
+	drawDocument(doc, columnInfo)
 	drawFooter(doc)
+	termbox.Flush()
 }

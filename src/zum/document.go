@@ -30,6 +30,7 @@ type Document struct {
 	Width       int
 	Height      int
 	Cells       map[Index]Cell
+	Columns     map[uint]int
 	ColumnWidth []int
 	Cursor      Index
 	Scroll      Index
@@ -42,6 +43,7 @@ func NewDocument() *Document {
 		Width:       DefaultWidth,
 		Height:      DefaultHeight,
 		Cells:       make(map[Index]Cell),
+		Columns:     make(map[uint]int),
 		ColumnWidth: make([]int, DefaultWidth),
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
@@ -78,6 +80,7 @@ func LoadDocument(filename string) (*Document, error) {
 		Width:       0,
 		Height:      0,
 		Cells:       make(map[Index]Cell),
+		Columns:     make(map[uint]int),
 		ColumnWidth: nil,
 		Scroll:      NewIndex(0, 0),
 		Cursor:      NewIndex(0, 0),
@@ -172,17 +175,33 @@ func (d *Document) Evaluate() {
 	}
 }
 
-func (d *Document) ModifyColumnWidth(column, modification int) {
-	if column < 0 || column >= d.Width {
+func (d *Document) GetColumnWidth(column int) int {
+	if column < 0 {
+		return DefaultColumnWidth
+	}
+
+	width, exists := d.Columns[uint(column)]
+	if exists {
+		return width
+	}
+	return DefaultColumnWidth
+}
+
+func (d *Document) ModifyColumnWidth(column int, modification int) {
+	if column < 0 {
 		return
 	}
 
 	d.Changed = true
-	d.ColumnWidth[column] += modification
 
-	if d.ColumnWidth[column] < MinColumnWidth {
-		d.ColumnWidth[column] = MinColumnWidth
+	width := d.GetColumnWidth(column)
+	width += modification
+
+	if width < MinColumnWidth {
+		width = MinColumnWidth
 	}
+
+	d.Columns[uint(column)] = width
 }
 
 func (d *Document) Save() error {

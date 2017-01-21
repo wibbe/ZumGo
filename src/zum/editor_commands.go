@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"strings"
 )
 
@@ -9,12 +10,16 @@ func NavigateUp() {
 	doc := CurrentDoc()
 	if doc.Cursor.Y > 0 {
 		doc.Cursor.Y -= 1
+
+		if doc.Cursor.Y < doc.Scroll.Y {
+			doc.Scroll.Y = doc.Cursor.Y
+		}
 	}
 }
 
 func NavigateDown() {
 	doc := CurrentDoc()
-	if doc.Cursor.Y < (doc.Height - 1) {
+	if doc.Cursor.Y < (math.MaxInt32 - 1) {
 		doc.Cursor.Y += 1
 	}
 }
@@ -23,23 +28,21 @@ func NavigateLeft() {
 	doc := CurrentDoc()
 	if doc.Cursor.X > 0 {
 		doc.Cursor.X -= 1
+
+		if doc.Cursor.X < doc.Scroll.X {
+			doc.Scroll.X = doc.Cursor.X
+		}
 	}
 }
 
 func NavigateRight() {
 	doc := CurrentDoc()
-	if doc.Cursor.X < (doc.Width - 1) {
+	if doc.Cursor.X < (math.MaxInt32 - 1) {
 		doc.Cursor.X += 1
-	}
-}
 
-func NavigateRightOrNewLine() {
-	doc := CurrentDoc()
-	if doc.Cursor.X < (doc.Width - 1) {
-		doc.Cursor.X += 1
-	} else if doc.Cursor.Y < (doc.Height - 1) {
-		doc.Cursor.X = 0
-		doc.Cursor.Y += 1
+		if doc.Cursor.X >= ViewportSize.X {
+			doc.Scroll.X += 1
+		}
 	}
 }
 
