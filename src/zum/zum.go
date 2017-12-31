@@ -1,14 +1,37 @@
 package main
 
 import (
+	//	"github.com/nsf/termbox-go"
+	"app"
 	"log"
-	"os"
-
-	"github.com/nsf/termbox-go"
 )
 
 var applicationRunning bool
 
+type Zum struct {
+}
+
+func NewZum() *Zum {
+	return &Zum{}
+}
+
+func (z *Zum) OnResize(w, h int) {
+	log.Println("Resize")
+}
+
+func (z *Zum) OnPaint(w, h int) {
+	app.FillRect(app.NewRectI(0, w, 0, h), app.WhiteBrush)
+}
+
+func (z *Zum) OnMouseMove(x, y float32) {
+
+}
+
+func (z *Zum) OnMouseEvent(button app.MouseButton, event app.MouseEvent, x, y float32) {
+
+}
+
+/*
 func main() {
 	err := termbox.Init()
 	if err != nil {
@@ -20,17 +43,6 @@ func main() {
 	termbox.SetInputMode(termbox.InputEsc)
 	termbox.HideCursor()
 
-	// Setup log
-	logFile, err := os.Create(".zum.log")
-	if err != nil {
-		panic(err)
-	}
-	defer logFile.Close()
-
-	log.SetOutput(logFile)
-	log.SetFlags(log.Ltime | log.Lshortfile)
-
-	log.Println("Application initialized")
 
 	InitEditor()
 	RedrawInterface()
@@ -49,3 +61,4 @@ func main() {
 	}
 
 }
+*/
