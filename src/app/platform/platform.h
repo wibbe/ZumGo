@@ -12,7 +12,7 @@
 
 typedef struct app_t app_t;
 typedef uint32_t app_brush_t;
-typedef uint32_t app_font_t;
+typedef int32_t app_font_t;
 
 #define APP_TRANSPARENT_BRUSH 0
 #define APP_WHITE_BRUSH 1

@@ -29,5 +29,7 @@ func main() {
 	zum = NewZum()
 	app.SetApplication(zum)
 
+	InitEditor()
+
 	app.Run()
 }

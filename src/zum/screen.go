@@ -21,13 +21,13 @@ type columnInfo struct {
 }
 
 func clearScreen() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	//termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 }
 
 func calculateColumnInfo(doc *Document) ([]columnInfo, int) {
 	info := make([]columnInfo, 0)
 
-	w, _ := termbox.Size()
+	w, _ := zum.Size()
 
 	x := RowHeaderWidth
 	col := doc.Scroll.X
@@ -46,7 +46,8 @@ func calculateColumnInfo(doc *Document) ([]columnInfo, int) {
 func drawText(x, y, length int, fg, bg termbox.Attribute, str string, format Format) {
 	if length == -1 {
 		for i, char := range str {
-			termbox.SetCell(x+i, y, char, fg, bg)
+			//termbox.SetCell(x+i, y, char, fg, bg)
+			zum.SetCell(x+i, y, char)
 		}
 	} else {
 		start := 0
@@ -73,8 +74,9 @@ func drawText(x, y, length int, fg, bg termbox.Attribute, str string, format For
 				ch = runes[charIdx]
 			}
 
-			style := fg
-			termbox.SetCell(x+i, y, ch, style, bg)
+			//style := fg
+			//termbox.SetCell(x+i, y, ch, style, bg)
+			zum.SetCell(x+i, y, ch)
 		}
 	}
 }
@@ -97,7 +99,7 @@ func drawHeaders(doc *Document, info []columnInfo) {
 	}
 
 	// Draw row headers
-	_, h := termbox.Size()
+	_, h := zum.Size()
 
 	yEnd := h - 2
 	if doc.Height < (h - 2) {
@@ -131,7 +133,7 @@ func drawDocument(doc *Document, columnInfo []columnInfo) {
 }
 
 func drawFooter(doc *Document) {
-	w, h := termbox.Size()
+	w, h := zum.Size()
 
 	filename := "[No Name]"
 	if doc.Filename != "" {
@@ -175,5 +177,5 @@ func RedrawInterface() {
 
 	drawDocument(doc, columnInfo)
 	drawFooter(doc)
-	termbox.Flush()
+	//termbox.Flush()
 }

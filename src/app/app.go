@@ -34,7 +34,7 @@ type Application interface {
 }
 
 type Brush uint32
-type Font uint32
+type Font int32
 
 type Color struct {
 	R, G, B, A float32
@@ -50,22 +50,24 @@ type Vec struct {
 
 type MouseButton int
 type MouseEvent int
+type FontWeight uint32
+type Alignment uint32
 
 const (
 	TransparentBrush uint32 = C.APP_TRANSPARENT_BRUSH
 	WhiteBrush              = C.APP_WHITE_BRUSH
 	BlackBrush              = C.APP_BLACK_BRUSH
 
-	FontWeightNormal = C.APP_FONT_WEIGHT_NORMAL
-	FontWeightNarrow = C.APP_FONT_WEIGHT_NARROW
-	FontWeightBold   = C.APP_FONT_WEIGHT_BOLD
+	FontWeightNormal FontWeight = C.APP_FONT_WEIGHT_NORMAL
+	FontWeightNarrow            = C.APP_FONT_WEIGHT_NARROW
+	FontWeightBold              = C.APP_FONT_WEIGHT_BOLD
 
-	AlignLeft    = C.APP_ALIGN_LEFT
-	AlignRight   = C.APP_ALIGN_RIGHT
-	AlignVCenter = C.APP_ALIGN_VCENTER
-	AlignTop     = C.APP_ALIGN_TOP
-	AlignBottom  = C.APP_ALIGN_BOTTOM
-	AlighHCenter = C.APP_ALIGN_HCENTER
+	AlignLeft    Alignment = C.APP_ALIGN_LEFT
+	AlignRight             = C.APP_ALIGN_RIGHT
+	AlignVCenter           = C.APP_ALIGN_VCENTER
+	AlignTop               = C.APP_ALIGN_TOP
+	AlignBottom            = C.APP_ALIGN_BOTTOM
+	AlignHCenter           = C.APP_ALIGN_HCENTER
 
 	ButtonLeft   MouseButton = C.APP_BUTTON_LEFT
 	ButtonMiddle             = C.APP_BUTTON_MIDDLE
@@ -73,6 +75,8 @@ const (
 
 	Press   MouseEvent = C.APP_PRESS
 	Release            = C.APP_RELEASE
+
+	NoFont Font = -1
 )
 
 var internalApp *C.app_t
@@ -80,6 +84,10 @@ var externalApp Application
 
 func NewRect(left, top, right, bottom float32) Rect {
 	return Rect{left, top, right, bottom}
+}
+
+func NewRectI(left, top, right, bottom int) Rect {
+	return Rect{float32(left), float32(top), float32(right), float32(bottom)}
 }
 
 func (r *Rect) Move(x, y float32) {
@@ -93,8 +101,16 @@ func (r Rect) Hit(x, y float32) bool {
 	return r.Left < x && r.Top < y && r.Right > x && r.Bottom > y
 }
 
-func NewRectI(left, top, right, bottom int) Rect {
-	return Rect{float32(left), float32(top), float32(right), float32(bottom)}
+func (b Brush) Destory() {
+	if internalApp != nil {
+		C.app_destroy_brush(internalApp, C.app_brush_t(b))
+	}
+}
+
+func (f Font) Destroy() {
+	if internalApp != nil {
+		C.app_destroy_font(internalApp, C.app_font_t(f))
+	}
 }
 
 func Init(title string, width, height int) error {
@@ -136,6 +152,15 @@ func CreateSolidBrush(color Color) Brush {
 	return Brush(0)
 }
 
+func CreateFont(familyName string, pointSize float32, fontWeight FontWeight) Font {
+	if internalApp != nil {
+		name := C.CString(familyName)
+		defer C.free(unsafe.Pointer(name))
+		return Font(C.app_create_font(internalApp, name, C.float(pointSize), C.uint32_t(fontWeight)))
+	}
+	return Font(-1)
+}
+
 func Repaint() {
 	if internalApp != nil {
 		C.app_repaint(internalApp)
@@ -157,6 +182,15 @@ func DrawRect(rect Rect, brush Brush, strokeThickness float32) {
 func DrawRoundedRect(rect Rect, radius float32, brush Brush, strokeThickness float32) {
 	if internalApp != nil {
 		C.app_draw_rounded_rectangle(internalApp, *(*C.app_rect_t)(unsafe.Pointer(&rect)), C.float(radius), C.app_brush_t(brush), C.float(strokeThickness))
+	}
+}
+
+// void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment);
+func DrawText(text string, font Font, brush Brush, bounds Rect, alignment Alignment) {
+	if internalApp != nil {
+		t := C.CString(text)
+		defer C.free(unsafe.Pointer(t))
+		C.app_draw_text(internalApp, t, C.app_font_t(font), C.app_brush_t(brush), *(*C.app_rect_t)(unsafe.Pointer(&bounds)), C.uint32_t(alignment))
 	}
 }
 

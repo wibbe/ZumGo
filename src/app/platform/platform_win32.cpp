@@ -187,7 +187,7 @@ static void create_font(app_t * app, uint32_t idx)
    InternalFont & font = app->fonts[idx];
    if (font.format == nullptr)
    {
-      //printf("Creating font(%d) %s with size %f\n", idx, font.fontFamily.c_str(), font.pointSize);
+      printf("Creating font(%d) %s with size %f\n", idx, font.fontFamily.c_str(), font.pointSize);
 
       std::wstring fontFamily = to_wstr(font.fontFamily.c_str());
       HRESULT result = app->writeFactory->CreateTextFormat(fontFamily.c_str(),
@@ -203,6 +203,10 @@ static void create_font(app_t * app, uint32_t idx)
          fprintf(stderr, "Failed to create font(%d) %s\n", idx, font.fontFamily.c_str());
          font.format = nullptr;
       }
+   }
+   else
+   {
+      fprintf(stderr, "Trying to create existing font(%d)\n", idx);
    }
 }
 
@@ -579,12 +583,16 @@ EXTERN_C app_font_t app_create_font(app_t * app, const char * fontFamily, float 
 {
    uint32_t font = 0;
 
+   fprintf(stderr, "Creating font '%s'\n", fontFamily);
+
    if (app->nextFont == -1)
    {
       font = app->fonts.size();
       app->fonts.push_back(InternalFont(font, fontFamily, pointSize, fontWeight));
       create_font(app, font);
    }
+
+   fprintf(stderr, "  Font: %d\n", font);
 
    return font;
 }
@@ -663,7 +671,7 @@ EXTERN_C void app_fill_rounded_rectangle(app_t * app, app_rect_t rect, float rad
 EXTERN_C void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment)
 {
    if (app == nullptr || app->renderTarget == nullptr ||
-       font >= app->fonts.size() || app->fonts[font].format == nullptr ||
+       font < 0 || font >= (int)app->fonts.size() || app->fonts[font].format == nullptr ||
        brush >= app->brushes.size() || app->brushes[brush].brush == nullptr)
    {
       fprintf(stderr, "Invalid draw_text setup\n");
