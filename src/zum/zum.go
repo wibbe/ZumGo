@@ -53,13 +53,13 @@ func (z *Zum) OnMouseEvent(button app.MouseButton, event app.MouseEvent, x, y fl
 }
 
 func (z *Zum) Size() (w, h int) {
-	w = z.width / FontWidth
-	h = z.height / FontHeight
+	w = z.width/FontWidth + 1
+	h = z.height/FontHeight + 1
 	return
 }
 
 func (z *Zum) SetCell(col, row int, ch rune) {
-	app.DrawText(string(ch), z.font, app.BlackBrush, app.NewRectI(col*FontWidth, row*FontHeight, (col+1)*FontWidth, (row+1)*FontHeight), app.AlignVCenter|app.AlignHCenter)
+	app.DrawChar(ch, z.font, app.BlackBrush, app.NewRectI(col*FontWidth, row*FontHeight, (col+1)*FontWidth, (row+1)*FontHeight), app.AlignVCenter|app.AlignHCenter)
 }
 
 /*

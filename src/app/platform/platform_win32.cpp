@@ -668,7 +668,7 @@ EXTERN_C void app_fill_rounded_rectangle(app_t * app, app_rect_t rect, float rad
                                            app->brushes[brush].brush);
 }
 
-EXTERN_C void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment)
+EXTERN_C void app_draw_text_utf16(app_t * app, const wchar_t * text, int len, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment)
 {
    if (app == nullptr || app->renderTarget == nullptr ||
        font < 0 || font >= (int)app->fonts.size() || app->fonts[font].format == nullptr ||
@@ -693,9 +693,14 @@ EXTERN_C void app_draw_text(app_t * app, const char * text, app_font_t font, app
    app->fonts[font].format->SetTextAlignment(textAlignment);
    app->fonts[font].format->SetParagraphAlignment(paragraphAlignment);
 
-   std::wstring str = to_wstr(text);
-   app->renderTarget->DrawText(str.c_str(), str.size(),
+   app->renderTarget->DrawText(text, len,
                                app->fonts[font].format,
                                toD2DRect(bounds),
                                app->brushes[brush].brush);
+}
+
+EXTERN_C void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment)
+{
+   std::wstring str = to_wstr(text);
+   app_draw_text_utf16(app, str.c_str(), str.size(), font, brush, bounds, alignment);
 }

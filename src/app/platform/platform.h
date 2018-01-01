@@ -105,4 +105,8 @@ EXTERN_C void app_fill_rounded_rectangle(app_t * app, app_rect_t rect, float rad
 
 EXTERN_C void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment);
 
+#ifdef APP_WINDOWS
+EXTERN_C void app_draw_text_utf16(app_t * app, const wchar_t * text, int len, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment);
+#endif
+
 #endif

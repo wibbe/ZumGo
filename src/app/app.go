@@ -3,6 +3,7 @@ package app
 /*
 #cgo LDFLAGS: -L${SRCDIR}/../../bin -lplatform
 #cgo windows LDFLAGS: -luser32 -lole32 -ld2d1 -ldwrite -lstdc++
+#cgo windows CFLAGS: -DAPP_WINDOWS
 #include "platform/platform.h"
 #include <stdlib.h>
 
@@ -23,6 +24,7 @@ import "C"
 
 import (
 	"errors"
+	"unicode/utf16"
 	"unsafe"
 )
 
@@ -185,12 +187,24 @@ func DrawRoundedRect(rect Rect, radius float32, brush Brush, strokeThickness flo
 	}
 }
 
-// void app_draw_text(app_t * app, const char * text, app_font_t font, app_brush_t brush, app_rect_t bounds, uint32_t alignment);
 func DrawText(text string, font Font, brush Brush, bounds Rect, alignment Alignment) {
 	if internalApp != nil {
 		t := C.CString(text)
 		defer C.free(unsafe.Pointer(t))
 		C.app_draw_text(internalApp, t, C.app_font_t(font), C.app_brush_t(brush), *(*C.app_rect_t)(unsafe.Pointer(&bounds)), C.uint32_t(alignment))
+	}
+}
+
+func DrawTextFast(text []rune, font Font, brush Brush, bounds Rect, alignment Alignment) {
+	if internalApp != nil {
+		t := utf16.Encode(text)
+		C.app_draw_text_utf16(internalApp, (*C.wchar_t)(unsafe.Pointer(&t[0])), C.int(len(t)), C.app_font_t(font), C.app_brush_t(brush), *(*C.app_rect_t)(unsafe.Pointer(&bounds)), C.uint32_t(alignment))
+	}
+}
+
+func DrawChar(ch rune, font Font, brush Brush, bounds Rect, alignment Alignment) {
+	if internalApp != nil {
+		C.app_draw_text_utf16(internalApp, (*C.wchar_t)(unsafe.Pointer(&ch)), 1, C.app_font_t(font), C.app_brush_t(brush), *(*C.app_rect_t)(unsafe.Pointer(&bounds)), C.uint32_t(alignment))
 	}
 }
 
