@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/ericlagergren/decimal",
+			"repository": "https://github.com/ericlagergren/decimal",
+			"revision": "c5c907301b5147099364abee7933865ed84ec6c7",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/mattn/go-runewidth",
 			"repository": "https://github.com/mattn/go-runewidth",
 			"revision": "d6bea18f789704b5f83375793155289da36a3c7f",
